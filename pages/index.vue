@@ -1,72 +1,142 @@
 <template>
-  <div class="container">
-    <div>
-      <logo />
-      <h1 class="title">
-        hotpepper-sample
-      </h1>
-      <h2 class="subtitle">
-        My top-notch Nuxt.js project
-      </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
-    </div>
-  </div>
+  <section class="index-page">
+    <h2>検索結果（{{shops.length}}件）</h2>
+    <p class="error__message" v-if="error">データの取得に失敗しました。</p>
+    <ul>
+      <li v-for="shop in shops" :key="shop.id" @click="$router.push(`/${shop.id}`)" class="card">
+        <div class="card__img">
+          <img :src="shop.photo.pc.l">
+        </div>
+        <div class="card__content">
+          <p class="card__name">{{shop.name}}</p>
+          <div class="card__genre">
+            <span>{{shop.genre.name}}</span>
+          </div>
+          <p class="card__text">{{shop.address}}</p>
+          <p class="card__text">{{shop.open}}</p>
+          <p class="card__text">{{shop.budget.average}}</p>
+        </div>
+      </li>
+    </ul>
+  </section>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+const getCurrentPosition = () => {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject)
+  })
+}
 
 export default {
-  components: {
-    Logo
+  layout: 'index',
+  scrollTop: true,
+  data() {
+    return {
+      shops: [],
+      error: false
+    }
+  },
+  methods: {
+    setError(error) {
+      console.log(error)
+      this.error = true
+    }
+  },
+  async mounted() {
+    //現在地を取得する
+    const position = await getCurrentPosition().catch(this.setError)
+    if (this.error) return;
+    //APIからデータを取得
+    const { data } = await this.$axios.get('http://localhost:3000/api/gourmet/v1/',{
+      params: {
+        key: process.env.apikey,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        format: 'json'
+      }
+    }).catch(this.error)
+    if (this.error) return;
+    //エラーを取得した場合
+    if (data.results.error !== undefined) {
+      console.log(data.results.error)
+      this.error = true
+      return;
+    }
+    //取得したデータを設定
+    this.shops = data.results.shop
   }
 }
 </script>
 
-<style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
+<style lang="scss">
+.index-page {
+  max-width: 1240px;
+  width: 100%;
+  h2 {
+    background: #fff;
+    color: #2c3e50;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 40px 20px 20px 20px;
+    padding: 15px 70px;
+    position: relative;
+    &::before {
+      content: '★';
+      background: #e74c3c;
+      box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 26px;
+      line-height: 60px;
+      width: 40px;
+      text-align: center;
+      position: absolute;
+      left: 14px;
+      top: -5px;
+    }
+  }
+}
+.card {
+  background: #fff;
+  border: 1px solid #eee;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  margin: 10px;
+  padding: 10px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family: 'Quicksand', 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
+  transition: all 0.4s;
+  &:hover {
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  &__img {
+    margin-right: 12px;
+    & img {
+      width: 250px;
+      height: 100%;
+      object-fit: cover
+    }
+  }
+  &__content {
+    color: #333;
+    padding: 8px;
+  }
+  &__name {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  &__genre {
+    margin: 12px 0;
+    > span {
+      background: #e74c3c;
+      border-radius: 3px;
+      color: #fff;
+      font-size: 14px;
+      padding: 2px 8px;
+    }
+  }
+  &__text {
+    font-size: 18px;
+    line-height: 28px;
+  }
 }
 </style>

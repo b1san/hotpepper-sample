@@ -23,6 +23,7 @@ export default {
   ** Global CSS
   */
   css: [
+      '~/assets/scss/reset.scss'
   ],
   /*
   ** Plugins to load before mounting the App
@@ -41,6 +42,16 @@ export default {
   ** See https://axios.nuxtjs.org/options
   */
   axios: {
+    proxy: true
+  },
+  proxy: {
+    '/api': {
+      target: 'http://webservice.recruit.co.jp/hotpepper',
+      pathRewrite: { '^/api': '' } // rewrite
+    }
+  },
+  env: {
+    apikey: '<<your api key>>',
   },
   /*
   ** Build configuration

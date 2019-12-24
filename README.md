@@ -1,22 +1,25 @@
 # hotpepper-sample
 
-> My top-notch Nuxt.js project
+## install
 
-## Build Setup
+リポジトリを取得したら依存パッケージをインストールします。
 
-``` bash
-# install dependencies
-$ npm run install
-
-# serve with hot reload at localhost:3000
-$ npm run dev
-
-# build for production and launch server
-$ npm run build
-$ npm run start
-
-# generate static project
-$ npm run generate
+```bash
+$npm install
 ```
 
-For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
+##　API Key
+
+リクルートWEBサービスに登録してAPI Keyを取得します。
+
+[https://webservice.recruit.co.jp/register/index.html](https://webservice.recruit.co.jp/register/index.html)
+
+取得したAPI Keyをnuxt.config.jsのenvに設定します。
+
+## run serve
+
+サーバーを起動して、ページにアクセスしてください。
+
+```bash
+$npm run serve
+```
