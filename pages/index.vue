@@ -44,27 +44,28 @@ export default {
     }
   },
   async mounted() {
-    //現在地を取得する
-    const position = await getCurrentPosition().catch(this.setError)
-    if (this.error) return;
-    //APIからデータを取得
-    const { data } = await this.$axios.get('http://localhost:3000/api/gourmet/v1/',{
-      params: {
-        key: process.env.apikey,
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-        format: 'json'
+    try {
+      //現在地を取得する
+      const position = await getCurrentPosition().catch(this.setError)
+      //APIからデータを取得
+      const { data } = await this.$axios.get('http://localhost:3000/api/gourmet/v1/',{
+        params: {
+          key: process.env.apikey,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          format: 'json'
+        }
+      })
+      //エラーを取得した場合
+      if (data.results.error !== undefined) {
+        this.error = true
+        return;
       }
-    }).catch(this.error)
-    if (this.error) return;
-    //エラーを取得した場合
-    if (data.results.error !== undefined) {
-      console.log(data.results.error)
-      this.error = true
-      return;
+      //取得したデータを設定
+      this.shops = data.results.shop
+    } catch(error) {
+      this.setError(error)
     }
-    //取得したデータを設定
-    this.shops = data.results.shop
   }
 }
 </script>
